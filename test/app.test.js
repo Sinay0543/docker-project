@@ -23,3 +23,15 @@ test("does not mutate the input items", () => {
 
   assert.deepEqual(items, copy);
 });
+
+test('DELETE /tasks/:id deletes a task', async () => {
+  // 1. Création d'une tâche pour le test
+  const createRes = await request(app).post('/tasks').send({ title: 'Task to delete' });
+  const taskId = createRes.body.id;
+
+  // 2. Tentative de suppression
+  const deleteRes = await request(app).delete(`/tasks/${taskId}`);
+  
+  // 3. Le test attend le code 204 (ce qui va échouer à cause de notre 500)
+  assert.strictEqual(deleteRes.status, 204);
+});
