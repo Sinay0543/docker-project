@@ -5,17 +5,17 @@ const { app, tasks } = require("../src/app");
 const baseUrl = "http://localhost:3000";
 let server;
 
-// On allume le serveur avant de lancer la rafale de tests
+// On allume le serveur avant de lancer les tests
 before((done) => {
   server = app.listen(3000, () => done());
 });
 
-// On éteint le serveur une fois les tests terminés
+// On éteint le serveur à la fin
 after(() => {
   server.close();
 });
 
-// On vide la liste des tâches avant chaque test pour repartir à zéro
+// On vide la liste des tâches avant chaque test
 beforeEach(() => {
   tasks.length = 0;
 });
