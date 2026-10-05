@@ -4,11 +4,14 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'terraform/**'
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
   pull_request:
     branches: [ main ]
     paths:
-      - 'terraform/**'
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
 
 jobs:
   validate:
@@ -24,7 +27,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format Check
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive
 
       - name: Terraform Init
         run: terraform init -backend=false
