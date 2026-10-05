@@ -31,12 +31,11 @@ app.get("/total", (_req, res) => {
     { price: 5, quantity: 3 }
   ];
 
+  res.json({ total: calculateTotal(items) });
+});
 
 app.get("/tasks", (_req, res) => {
   res.status(200).json(tasks);
-});
-
-  res.json({ total: calculateTotal(items) });
 });
 
 if (require.main === module) {
