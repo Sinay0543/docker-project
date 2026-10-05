@@ -3,15 +3,16 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(express.json());
+let tasks = [];
+let nextId = 1;
+
 function calculateTotal(items) {
   return items.reduce((total, item) => total + (item.price * item.quantity), 0);
 }
 
 app.get("/", (_req, res) => {
-  res.json({
-    service: "devops-platform-challenge",
-    status: "ok"
-  });
+  res.json({ service: "devops-platform-challenge", status: "ok" });
 });
 
 app.get("/health", (_req, res) => {
@@ -23,8 +24,24 @@ app.get("/total", (_req, res) => {
     { price: 10, quantity: 2 },
     { price: 5, quantity: 3 }
   ];
-
   res.json({ total: calculateTotal(items) });
+});
+
+app.get("/tasks", (req, res) => {
+  res.status(200).json(tasks);
+});
+
+app.post("/tasks", (req, res) => {
+  const { title } = req.body;
+
+  if (typeof title !== "string" || title.trim() === "") {
+    return res.status(400).json({ error: "Title is required" });
+  }
+
+  const newTask = { id: nextId++, title: title.trim(), completed: false };
+  tasks.push(newTask);
+
+  res.status(201).json(newTask);
 });
 
 if (require.main === module) {
