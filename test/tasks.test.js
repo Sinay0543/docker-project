@@ -5,19 +5,45 @@ const { app, tasks } = require("../src/app");
 let server;
 let baseUrl;
 
+// On s'assure via une Promise que le serveur est bien démarré avant de lancer les tests
 before(async () => {
-  server = app.listen(0);
-  await new Promise((resolve) => server.once("listening", resolve));
-  baseUrl = `http://127.0.0.1:${server.address().port}`;
+  await new Promise((resolve) => {
+    server = app.listen(0, resolve);
+  });
+  baseUrl = `http://localhost:${server.address().port}`;
 });
 
+// On éteint le serveur proprement à la fin
 after(() => {
   server.close();
 });
 
+// On vide la liste des tâches avant chaque test
 beforeEach(() => {
-  // Empty the shared store so each test starts from a known state.
   tasks.length = 0;
+});
+
+test("POST /tasks creates a new task", async () => {
+  const response = await fetch(`${baseUrl}/tasks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: "Apprendre Docker" })
+  });
+  const data = await response.json();
+  
+  assert.strictEqual(response.status, 201);
+  assert.strictEqual(data.title, "Apprendre Docker");
+  assert.strictEqual(data.completed, false);
+});
+
+test("POST /tasks fails with invalid title", async () => {
+  const response = await fetch(`${baseUrl}/tasks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: "   " })
+  });
+  
+  assert.strictEqual(response.status, 400);
 });
 
 test("GET /tasks returns HTTP 200 with JSON", async () => {
