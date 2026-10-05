@@ -3,6 +3,13 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(express.json());
+
+// In-memory task store shared by the /tasks routes (no database for this challenge).
+const tasks = [];
+// eslint-disable-next-line no-unused-vars -- used by POST /tasks (issue #2)
+let nextId = 1;
+
 function calculateTotal(items) {
   return items.reduce((total, item) => total + (item.price * item.quantity), 0);
 }
@@ -24,6 +31,11 @@ app.get("/total", (_req, res) => {
     { price: 5, quantity: 3 }
   ];
 
+
+app.get("/tasks", (_req, res) => {
+  res.status(200).json(tasks);
+});
+
   res.json({ total: calculateTotal(items) });
 });
 
@@ -33,4 +45,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, calculateTotal };
+module.exports = { app, calculateTotal, tasks };
