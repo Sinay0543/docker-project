@@ -5,13 +5,12 @@ const { app, tasks } = require("../src/app");
 let server;
 let baseUrl;
 
-// On allume le serveur sur un port dynamique (0 = port libre automatique)
-before((done) => {
-  server = app.listen(0, () => {
-    const port = server.address().port;
-    baseUrl = `http://localhost:${port}`;
-    done();
+// On s'assure via une Promise que le serveur est bien démarré avant de lancer les tests
+before(async () => {
+  await new Promise((resolve) => {
+    server = app.listen(0, resolve);
   });
+  baseUrl = `http://localhost:${server.address().port}`;
 });
 
 // On éteint le serveur proprement à la fin
