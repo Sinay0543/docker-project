@@ -6,21 +6,48 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
-  test:
+  node:
+    name: node (${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-          
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
       - name: Install dependencies
         run: npm ci
-        
-      - name: Run tests
-        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+  # Keeps the "test" status check required by the main branch protection.
+  test:
+    if: always()
+    needs: node
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that every Node.js version passed
+        run: |
+          if [ "${{ needs.node.result }}" != "success" ]; then
+            echo "Node.js matrix result: ${{ needs.node.result }}"
+            exit 1
+          fi
