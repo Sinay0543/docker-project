@@ -2,15 +2,19 @@ const { test, before, after, beforeEach } = require("node:test");
 const assert = require("node:assert/strict");
 const { app, tasks } = require("../src/app");
 
-const baseUrl = "http://localhost:3000";
 let server;
+let baseUrl;
 
-// On allume le serveur avant de lancer les tests
+// On allume le serveur sur un port dynamique (0 = port libre automatique)
 before((done) => {
-  server = app.listen(3000, () => done());
+  server = app.listen(0, () => {
+    const port = server.address().port;
+    baseUrl = `http://localhost:${port}`;
+    done();
+  });
 });
 
-// On éteint le serveur à la fin
+// On éteint le serveur proprement à la fin
 after(() => {
   server.close();
 });
