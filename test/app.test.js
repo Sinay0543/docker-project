@@ -23,3 +23,20 @@ test("does not mutate the input items", () => {
 
   assert.deepEqual(items, copy);
 });
+test('POST /tasks creates a new task', async () => {
+  const response = await request(app)
+    .post('/tasks')
+    .send({ title: 'Apprendre Docker' });
+  
+  assert.strictEqual(response.status, 201);
+  assert.strictEqual(response.body.title, 'Apprendre Docker');
+  assert.strictEqual(response.body.completed, false);
+});
+
+test('POST /tasks fails with empty title', async () => {
+  const response = await request(app)
+    .post('/tasks')
+    .send({});
+  
+  assert.strictEqual(response.status, 400);
+});
