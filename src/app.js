@@ -3,6 +3,13 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(express.json());
+
+// In-memory task store shared by the /tasks routes (no database for this challenge).
+const tasks = [];
+// eslint-disable-next-line no-unused-vars -- used by POST /tasks (issue #2)
+let nextId = 1;
+
 function calculateTotal(items) {
   return items.reduce((total, item) => total + (item.price * item.quantity), 0);
 }
@@ -42,10 +49,29 @@ app.post("/tasks", (req, res) => {
   res.status(201).json(newTask);
 });
 
+app.get("/tasks", (_req, res) => {
+  res.status(200).json(tasks);
+});
+
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Application listening on port ${port}`);
   });
 }
 
-module.exports = { app, calculateTotal };
+module.exports = { app, calculateTotal, tasks };
+
+// --- ISSUE #4 : DELETE /tasks/:id ---
+app.delete("/tasks/:id", (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const taskIndex = tasks.findIndex(t => t.id === id);
+  
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: "Task not found" });
+  }
+
+  tasks.splice(taskIndex, 1);
+  
+  // ❌ ERREUR VOLONTAIRE POUR LE QUALITY GATE (devrait être 204)
+  res.status(500).send(); 
+});
