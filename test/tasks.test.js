@@ -98,3 +98,17 @@ test("DELETE /tasks/:id returns 404 for a non-numeric id", async () => {
 
   assert.equal(response.status, 404);
 });
+test("PATCH /tasks/:id updates an existing task", async () => {
+  tasks.push({ id: 1, title: "Old Title", completed: false });
+
+  const response = await fetch(`${baseUrl}/tasks/1`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ completed: true })
+  });
+
+  const data = await response.json();
+  
+  assert.equal(response.status, 200);
+  assert.equal(data.completed, true);
+});
