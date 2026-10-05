@@ -58,5 +58,5 @@ app.delete("/tasks/:id", (req, res) => {
   tasks.splice(taskIndex, 1);
   
   // ❌ ERREUR VOLONTAIRE POUR LE QUALITY GATE (devrait être 204)
-  res.status(500).send(); 
+  res.status(204).send(); 
 });
