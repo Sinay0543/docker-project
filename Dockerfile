@@ -1,26 +1,28 @@
-# Utiliser une image Node.js légère
+# Lightweight official Node.js image
 FROM node:20-alpine
 
-# Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copier uniquement les fichiers de dépendances en premier
+# Copy dependency manifests first to benefit from Docker layer caching
 COPY package*.json ./
 
-# Installer uniquement les dépendances de production
-RUN npm ci --omit=dev
+# Install production dependencies only
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copier le reste du code source
+# Copy the application source
 COPY src/ ./src/
 
-# Définir l'environnement en production
 ENV NODE_ENV=production
+ENV PORT=3000
 
-# Utiliser l'utilisateur non-root 'node' fourni par l'image
+# Run as the unprivileged "node" user shipped with the image
 USER node
 
-# Exposer le port sur lequel l'application écoute
 EXPOSE 3000
 
-# Commande pour démarrer l'application
-CMD ["npm", "start"]
+# Mark the container unhealthy if /health stops answering
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/health || exit 1
+
+# Start node directly (not through npm) so it receives SIGTERM on "docker stop"
+CMD ["node", "src/app.js"]
