@@ -51,3 +51,24 @@ test("GET /tasks returns every task with id, title and completed", async () => {
   }
   assert.deepEqual(body, tasks);
 });
+
+test("DELETE /tasks/:id deletes an existing task and returns 204", async () => {
+  tasks.push({ id: 1, title: "Task to delete", completed: false });
+
+  const response = await fetch(`${baseUrl}/tasks/1`, { method: "DELETE" });
+
+  assert.equal(response.status, 204);
+  assert.equal(tasks.length, 0);
+});
+
+test("DELETE /tasks/:id returns 404 for an unknown task", async () => {
+  const response = await fetch(`${baseUrl}/tasks/999`, { method: "DELETE" });
+
+  assert.equal(response.status, 404);
+});
+
+test("DELETE /tasks/:id returns 404 for a non-numeric id", async () => {
+  const response = await fetch(`${baseUrl}/tasks/abc`, { method: "DELETE" });
+
+  assert.equal(response.status, 404);
+});
