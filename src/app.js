@@ -44,10 +44,22 @@ app.post("/tasks", (req, res) => {
   res.status(201).json(newTask);
 });
 
+app.delete("/tasks/:id", (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const taskIndex = tasks.findIndex((t) => t.id === id);
+
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: "Task not found" });
+  }
+
+  tasks.splice(taskIndex, 1);
+  res.status(204).send();
+});
+
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Application listening on port ${port}`);
   });
 }
 
-module.exports = { app, calculateTotal };
+module.exports = { app, calculateTotal, tasks };
